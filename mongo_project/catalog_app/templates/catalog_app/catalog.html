@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% load pagination_tags%}
+{% block title %}catalog{% endblock %}
+{% block container %}
+    {% if hotels %}
+    {% autopaginate hotels 4 %}
+        {% for hotel in hotels %}
+        <div class="row">
+            <div class="col-sm-5 col-md-5 blog-main">
+                <div class="sidebar-module sidebar-module-inset">
+                    <br/>
+                    <a href="{% url 'catalog:hotel_page' hotel.pk %}" >
+                        <img src="\media\{{ hotel.hc_title_img }}" class="img-responsive">
+                    </a>
+                </div>
+            </div>
+
+            <div class="col-sm-5 col-md-6 col-sm-offset-1 blog-sidebar">
+                <div class="sidebar-module sidebar-module-inset">
+                    <a href="/catalog/{{ hotel.pk }}" ><h2>{{ hotel.hc_name }}</h2></a>
+                    <p>{{ hotel.hc_description }}</p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% endif %}
+{% paginate %}
+{% endblock %}
