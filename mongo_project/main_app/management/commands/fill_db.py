@@ -7,7 +7,7 @@ import shutil
 from pprint import pprint
 from random import randint, choice
 import datetime
-from bson.objectid import ObjectId
+import time
 
 
 # db_path = r'D:\Programms\MongoDB\data\db'
@@ -21,7 +21,7 @@ from bson.objectid import ObjectId
 #     call(r'net start MongoDB', shell=True)
 # except Exception as e:
 #     print(e)
-#
+
 # try:
 #     os.remove(r'catalog_app\migrations\0001_initial.py')
 #     print('catalog_app migrations deleted ')
@@ -55,17 +55,19 @@ category_list = [i['name'] for i in CATEGORY]
 
 
 def add_reserved():
+    reversed_list = []
     users = ['user{}'.format(i) for i in range(1, 11)]
-    person = User.objects.get(username=choice(users))
-    start_date = datetime.date(randint(2019, 2019), randint(1, 2), randint(1, 28))
-    start_date = start_date.fromtimestamp()
-    last_date = start_date + datetime.timedelta(randint(1, 30))
-    reserved_data = {
-        'person': person.id,
-        'check_in': start_date,
-        'check_out': last_date
-    }
-    return reserved_data
+    for _ in range(8):
+        person = User.objects.get(username=choice(users))
+        start_date = datetime.date(randint(2019, 2019), randint(1, 2), randint(1, 28))
+        last_date = start_date + datetime.timedelta(randint(1, 30))
+        reserved_data = {
+            'person': person.id,
+            'check_in': time.mktime(start_date.timetuple()),
+            'check_out': time.mktime(last_date.timetuple())
+        }
+        reversed_list.append(reserved_data)
+    return reversed_list
 
 
 def add_hotels():
@@ -126,7 +128,8 @@ def add_rooms():
             'places': randint(1, 5),
             'description': 'any description',
             'price': randint(5000, 50000),
-            'img': ''
+            'img': '',
+            'reserved': []
         }
         room_list.append(room_dict)
     return room_list
@@ -146,11 +149,11 @@ class Command(BaseCommand):
         #
         # # Создаем суперпользователя при помощи менеджера модели
         # super_user = User.objects.create_superuser('admin', 'admin@mail.com', '123')
-        #
+
         # for category in CATEGORY:
         #     new_category = Category(**category)
         #     new_category.save()
-        #
+
         # Hotel.objects.mongo_insert_many(add_hotels())
         #
         # for hotel in Hotel.objects.mongo_find():
@@ -158,12 +161,12 @@ class Command(BaseCommand):
 
 
         # for hotel in Hotel.objects.mongo_find():
-        #     Hotel.objects.mongo_update_many(hotel, {'$set': {'room': {'reserved': add_reserved()}}})
+        #     Hotel.objects.mongo_update_one(hotel, {'$set': {'room': {0: {'reserved': add_reserved()}}})
         #     pprint('OK')
 
 
-        # rooms = Hotel.objects.mongo_find_one({'name': 'The Oberoi Udaivilas'})['room']
-        # for i in rooms:
-        #     pprint(i['number'])
+        # for hotel in Hotel.objects.mongo_find():
+        #     pprint(hotel['room'][0])
 
-        pprint(datetime.datetime(datetime))
+
+
