@@ -2,9 +2,10 @@ from django.shortcuts import render
 from .models import Hotel
 from django.db.models import Q
 
+hotels = Hotel.objects.mongo_find()
+
 
 def catalog_page(request):
-    hotels = Hotel.objects()
     template = "catalog_app/catalog.html"
     context = {'hotels': hotels}
     return render(request, template, context)
