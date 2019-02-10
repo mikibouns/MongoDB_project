@@ -76,7 +76,8 @@ class RoomForm(forms.ModelForm):
 
 
 class Hotel(models.Model):
-    name = models.CharField(max_length=64, primary_key=True)
+    short_name = models.CharField(max_length=30, primary_key=True)
+    name = models.CharField(max_length=64)
     description = models.TextField()
     img = models.ImageField()
     room = models.EmbeddedModelField(

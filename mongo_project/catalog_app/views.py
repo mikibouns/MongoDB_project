@@ -1,10 +1,16 @@
-from django.shortcuts import render
+from django.shortcuts import render, HttpResponseRedirect
 from .models import Hotel
 from django.db.models import Q
 
 
-def get_hotels():
+def get_hotels(hotel_name=False):
+    if hotel_name:
+        return Hotel.objects.mongo_find_one({'short_name': hotel_name})
     return Hotel.objects.mongo_find()
+
+
+def get_rooms(hotel):
+    pass
 
 
 def catalog_page(request):
@@ -14,10 +20,8 @@ def catalog_page(request):
     return render(request, template, context)
 
 
-def hotel_card_page(request, pk):
-    pass
-    # hotel_card = HotelCard.objects.get(id=pk)
-    # hotel_rooms = HotelRoom.objects.filter(hr_hotel__id=pk)
+def hotel_page(request, short_name):
+    hotel = get_hotels(short_name)
     # check_in = (request.GET.get('check-in', None))
     # check_out = (request.GET.get('check-out', None))
     # places = (request.GET.get('places', None))
@@ -32,11 +36,6 @@ def hotel_card_page(request, pk):
     #         add_srv = request.POST.get('additional_services', 'RO')
     #
     #
-    # template = "catalog_app/hotel_card.html"
-    # context = {'hotel': hotel_card,
-    #            'rooms': hotel_rooms,
-    #            'room_filter': filter,
-    #            'check_in': check_in,
-    #            'check_out': check_out,
-    #            'places': places}
-    # return render(request, template, context)
+    template = "catalog_app/hotel_card.html"
+    context = {'hotel': hotel}
+    return render(request, template, context)

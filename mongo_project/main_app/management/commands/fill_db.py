@@ -109,6 +109,7 @@ def add_hotels():
                    мужчин. В таких условиях каждый почувствует себя комфортно.'}
     for name, desc in hotels_dict.items():
         hotel = {
+            'short_name': name.replace(' ', '_'),
             'name': name,
             'description': desc,
             'img': r'\hotels\{}.jpg'.format(jpg_count),
