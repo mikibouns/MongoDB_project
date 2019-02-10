@@ -9,10 +9,6 @@ def get_hotels(hotel_name=False):
     return Hotel.objects.mongo_find()
 
 
-def get_rooms(hotel):
-    pass
-
-
 def catalog_page(request):
     hotels = get_hotels()
     template = "catalog_app/catalog.html"
