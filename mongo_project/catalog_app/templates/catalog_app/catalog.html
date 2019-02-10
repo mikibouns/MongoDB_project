@@ -7,7 +7,7 @@
             <div class="col-sm-5 col-md-5 blog-main">
                 <div class="sidebar-module sidebar-module-inset">
                     <br/>
-                    <a href="\catalog\{{ hotel.short_name }}" >
+                    <a href="{% url 'catalog:hotel_page' hotel.short_name %}" >
                         <img src="\media\{{ hotel.img }}" class="img-responsive">
                     </a>
                 </div>
@@ -15,7 +15,7 @@
 
             <div class="col-sm-5 col-md-6 col-sm-offset-1 blog-sidebar">
                 <div class="sidebar-module sidebar-module-inset">
-                    <a href="\catalog\{{ hotel.short_name }}" ><h2>{{ hotel.name }}</h2></a>
+                    <a href="{% url 'catalog:hotel_page' hotel.short_name %}" ><h2>{{ hotel.name }}</h2></a>
                     <p>{{ hotel.description }}</p>
                 </div>
             </div>
