@@ -124,7 +124,8 @@ def add_rooms():
     room_list = []
     for i in range(1, 6):
         room_dict = {
-            'category': Category.objects.mongo_find_one({'name': choice(category_list)})['_id'],
+            'category': {'$ref': 'Category',
+                         '$id': Category.objects.mongo_find_one({'name': choice(category_list)})['_id']},
             'number': i,
             'places': randint(1, 5),
             'description': 'any description',
@@ -195,7 +196,11 @@ class Command(BaseCommand):
                                                {'$project':
                                                     {'room':
                                                          {'$filter':
-                                                              {'input': '$room',
+                                                              {'input': {'map': {'input': '$room',
+                                                                                 'as': 'room',
+                                                                                 'in': {'reversed': {'$filter': {'input': '$$room.reserved',
+                                                                                                                 'as': 'rev',
+                                                                                                                 'cound': {'$or' []}}}}}},
                                                                'as': 'room',
                                                                'cond': request_condition()
                                                                }
@@ -206,12 +211,59 @@ class Command(BaseCommand):
             pprint(hotel['room'])
 
 
-        # for h in Hotel.objects.mongo_aggregate([{'$unwind': '$room'},
-        #                                         {'$match': {'name': 'The Oberoi Udaivilas'}},
-        #                                         ]):
-        #     pprint(h)
+        # hotel = Hotel.objects.mongo_find_one({'name': 'The Oberoi Udaivilas'})['room'][0]['category']
+        # pprint(hotel.as_doc()['$ref'])
 
 
 
 
+db.mycollection.aggregate([
+  { "$match": {
+    "someArray": {
+      "$elemMatch": {
+         "name": "name1",
+         "someNestedArray": {
+           "$elemMatch": {
+             "name": "value",
+             "otherField": 1
+           }
+         }
+       }
+    }
+  }},
+  { "$addFields": {
+    "someArray": {
+      "$filter": {
+        "input": {
+          "$map": {
+            "input": "$someArray",
+            "as": "sa",
+            "in": {
+              "name": "$$sa.name",
+              "someNestedArray": {
+                "$filter": {
+                  "input": "$$sa.someNestedArray",
+                  "as": "sn",
+                  "cond": {
+                    "$and": [
+                      { "$eq": [ "$$sn.name", "value" ] },
+                      { "$eq": [ "$$sn.otherField", 1 ] }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+        },
+        "as": "sa",
+        "cond": {
+          "$and": [
+            { "$eq": [ "$$sa.name", "name1" ] },
+            { "$gt": [ { "$size": "$$sa.someNestedArray" }, 0 ] }
+          ]
+        }
+      }
+    }
+  }}
+])
 

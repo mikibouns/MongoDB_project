@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load dbref_data %}
 {% block title %}hotel_card{% endblock %}
 {% block container %}
 {% if hotel %}
@@ -72,7 +73,7 @@
     {% for room in room_filter %}
     <forma role="form" metod="post" action="#">
       <tr>
-        <td>{{ room.category }}</td>
+        <td>{{ room.category|dbref_data:"name" }}</td>
         <td>{{ room.price }} <span class="glyphicon glyphicon-euro"></span></td>
         <td>{{ room.places}}</td>
         <td>
