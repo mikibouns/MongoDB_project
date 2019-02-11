@@ -140,32 +140,32 @@ def add_rooms():
 class Command(BaseCommand):
     def handle(self, *args, **options):
 
-        # User.objects.all().delete()
-        # for user in range(1, 11):
-        #     new_user = User.objects.create_user(
-        #         username='user{}'.format(user),
-        #         email='user{}@mail.com'.format(user),
-        #         password='123',
-        #     )
-        #     new_user.save()
-        #
-        # # Создаем суперпользователя при помощи менеджера модели
-        # super_user = User.objects.create_superuser('admin', 'admin@mail.com', '123')
-        #
-        # for category in CATEGORY:
-        #     new_category = Category(**category)
-        #     new_category.save()
-        #
-        # Hotel.objects.mongo_insert_many(add_hotels())
-        #
-        # for hotel in Hotel.objects.mongo_find():
-        #     Hotel.objects.mongo_update_many(hotel, {'$set': {'room': add_rooms()}})
-        #
-        # for hotel in Hotel.objects.mongo_find():
-        #     Hotel.objects.mongo_update(
-        #         hotel,
-        #         {'$push': {'room.$[].reserved': {'$each': add_reserved()}}},
-        #     )
+        User.objects.all().delete()
+        for user in range(1, 11):
+            new_user = User.objects.create_user(
+                username='user{}'.format(user),
+                email='user{}@mail.com'.format(user),
+                password='123',
+            )
+            new_user.save()
+
+        # Создаем суперпользователя при помощи менеджера модели
+        super_user = User.objects.create_superuser('admin', 'admin@mail.com', '123')
+
+        for category in CATEGORY:
+            new_category = Category(**category)
+            new_category.save()
+
+        Hotel.objects.mongo_insert_many(add_hotels())
+
+        for hotel in Hotel.objects.mongo_find():
+            Hotel.objects.mongo_update_many(hotel, {'$set': {'room': add_rooms()}})
+
+        for hotel in Hotel.objects.mongo_find():
+            Hotel.objects.mongo_update(
+                hotel,
+                {'$push': {'room.$[].reserved': {'$each': add_reserved()}}},
+            )
 
 #-----------------------------------------------------------------------------------------------------------------------
 
@@ -186,29 +186,29 @@ class Command(BaseCommand):
         # pprint(Hotel.objects.mongo_find_one({'name': 'The Oberoi Udaivilas'})['room'][0]['reserved'])
 
 
-        def request_condition():
-            answer = {'$eq': ['$$room.places', 5]}
-            return answer
-
-        hotel1 = Hotel.objects.mongo_find_one({'name': 'The Oberoi Udaivilas'})
-        # # pprint(type(hotel1['room']))
-        for hotel in Hotel.objects.mongo_aggregate([{'$match': {'name': hotel1['name']}},
-                                               {'$project':
-                                                    {'room':
-                                                         {'$filter':
-                                                              {'input': {'map': {'input': '$room',
-                                                                                 'as': 'room',
-                                                                                 'in': {'reversed': {'$filter': {'input': '$$room.reserved',
-                                                                                                                 'as': 'rev',
-                                                                                                                 'cound': {'$or' []}}}}}},
-                                                               'as': 'room',
-                                                               'cond': request_condition()
-                                                               }
-                                                          }
-                                                     }
-                                                }
-                                               ]):
-            pprint(hotel['room'])
+        # def request_condition():
+        #     answer = {'$eq': ['$$room.places', 5]}
+        #     return answer
+        #
+        # hotel1 = Hotel.objects.mongo_find_one({'name': 'The Oberoi Udaivilas'})
+        # # # pprint(type(hotel1['room']))
+        # for hotel in Hotel.objects.mongo_aggregate([{'$match': {'name': hotel1['name']}},
+        #                                        {'$project':
+        #                                             {'room':
+        #                                                  {'$filter':
+        #                                                       {'input': {'map': {'input': '$room',
+        #                                                                          'as': 'room',
+        #                                                                          'in': {'reversed': {'$filter': {'input': '$$room.reserved',
+        #                                                                                                          'as': 'rev',
+        #                                                                                                          'cound': {'$or' []}}}}}},
+        #                                                        'as': 'room',
+        #                                                        'cond': request_condition()
+        #                                                        }
+        #                                                   }
+        #                                              }
+        #                                         }
+        #                                        ]):
+        #     pprint(hotel['room'])
 
 
         # hotel = Hotel.objects.mongo_find_one({'name': 'The Oberoi Udaivilas'})['room'][0]['category']
