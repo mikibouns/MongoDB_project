@@ -22,20 +22,20 @@ import pymongo
 # except Exception as e:
 #     print(e)
 
-# try:
-#     os.remove(r'catalog_app\migrations\0001_initial.py')
-#     print('catalog_app migrations deleted ')
-#     os.remove(r'django\contrib\auth\migrations\0001_initial.py')
-#     print('Auth migrations deleted ')
-# except Exception as e:
-#     print('Migrations is not found!')
-#
-# for command in ['makemigrations', 'migrate']:
-#     try:
-#         call('manage.py {}'.format(command), shell=True)
-#         print('{} completed successfully'.format(command))
-#     except Exception as e:
-#         print(e)
+try:
+    os.remove(r'catalog_app\migrations\0001_initial.py')
+    print('catalog_app migrations deleted ')
+    os.remove(r'django\contrib\auth\migrations\0001_initial.py')
+    print('Auth migrations deleted ')
+except Exception as e:
+    print('Migrations is not found!')
+
+for command in ['makemigrations', 'migrate']:
+    try:
+        call('manage.py {}'.format(command), shell=True)
+        print('{} completed successfully'.format(command))
+    except Exception as e:
+        print(e)
 
 
 CATEGORY = [
@@ -124,8 +124,7 @@ def add_rooms():
     room_list = []
     for i in range(1, 6):
         room_dict = {
-            'category': {'$ref': 'Category',
-                         '$id': Category.objects.mongo_find_one({'name': choice(category_list)})['_id']},
+            'category': {'_id': Category.objects.mongo_find_one({'name': choice(category_list)})['_id']},
             'number': i,
             'places': randint(1, 5),
             'description': 'any description',
@@ -140,34 +139,34 @@ def add_rooms():
 class Command(BaseCommand):
     def handle(self, *args, **options):
 
-        # User.objects.all().delete()
-        # for user in range(1, 11):
-        #     new_user = User.objects.create_user(
-        #         username='user{}'.format(user),
-        #         email='user{}@mail.com'.format(user),
-        #         password='123',
-        #     )
-        #     new_user.save()
-        #
-        # # Создаем суперпользователя при помощи менеджера модели
-        # super_user = User.objects.create_superuser('admin', 'admin@mail.com', '123')
-        #
-        # for category in CATEGORY:
-        #     new_category = Category(**category)
-        #     new_category.save()
-        #
-        # Hotel.objects.mongo_insert_many(add_hotels())
-        #
-        # for hotel in Hotel.objects.mongo_find():
-        #     Hotel.objects.mongo_update_many(hotel, {'$set': {'room': add_rooms()}})
-        #
-        # for i in range(5):
-        #     for hotel in Hotel.objects.mongo_find():
-        #         target_field = 'room.{}.reserved'.format(i)
-        #         Hotel.objects.mongo_update_many(
-        #             hotel,
-        #             {'$addToSet': {target_field: {'$each': add_reserved()}}},
-        #         )
+        User.objects.all().delete()
+        for user in range(1, 11):
+            new_user = User.objects.create_user(
+                username='user{}'.format(user),
+                email='user{}@mail.com'.format(user),
+                password='123',
+            )
+            new_user.save()
+
+        # Создаем суперпользователя при помощи менеджера модели
+        super_user = User.objects.create_superuser('admin', 'admin@mail.com', '123')
+
+        for category in CATEGORY:
+            new_category = Category(**category)
+            new_category.save()
+
+        Hotel.objects.mongo_insert_many(add_hotels())
+
+        for hotel in Hotel.objects.mongo_find():
+            Hotel.objects.mongo_update_many(hotel, {'$set': {'room': add_rooms()}})
+
+        for i in range(5):
+            for hotel in Hotel.objects.mongo_find():
+                target_field = 'room.{}.reserved'.format(i)
+                Hotel.objects.mongo_update_many(
+                    hotel,
+                    {'$addToSet': {target_field: {'$each': add_reserved()}}},
+                )
 
         # Hotel.objects.mongo_create_index([{'number', pymongo.ASCENDING}])
 

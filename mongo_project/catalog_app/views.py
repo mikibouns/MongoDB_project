@@ -12,6 +12,7 @@ def room_filter(hotel, places=None):
                                                                   {'input': {'$map': {'input': '$room',
                                                                                           'as': 'room',
                                                                                           'in': {
+                                                                                              'category': '$$room.category',
                                                                                               'number': '$$room.number',
                                                                                               'places': '$$room.places',
                                                                                               'price': '$$room.price',
