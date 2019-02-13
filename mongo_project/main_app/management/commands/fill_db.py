@@ -8,7 +8,7 @@ from pprint import pprint
 from random import randint, choice
 import datetime
 import time
-
+import pymongo
 
 # db_path = r'D:\Programms\MongoDB\data\db'
 #
@@ -160,14 +160,16 @@ class Command(BaseCommand):
         #
         # for hotel in Hotel.objects.mongo_find():
         #     Hotel.objects.mongo_update_many(hotel, {'$set': {'room': add_rooms()}})
+        #
+        # for i in range(5):
+        #     for hotel in Hotel.objects.mongo_find():
+        #         target_field = 'room.{}.reserved'.format(i)
+        #         Hotel.objects.mongo_update_many(
+        #             hotel,
+        #             {'$addToSet': {target_field: {'$each': add_reserved()}}},
+        #         )
 
-        for i in range(5):
-            for hotel in Hotel.objects.mongo_find():
-                target_field = 'room.{}.reserved'.format(i)
-                Hotel.objects.mongo_update(
-                    hotel,
-                    {'$addToSet': {target_field: {'$each': add_reserved()}}},
-                )
+        # Hotel.objects.mongo_create_index([{'number', pymongo.ASCENDING}])
 
 #-----------------------------------------------------------------------------------------------------------------------
 
@@ -188,13 +190,33 @@ class Command(BaseCommand):
         # pprint(Hotel.objects.mongo_find_one({'name': 'The Oberoi Udaivilas'})['room'][0]['reserved'])
 
 
-        #
-        # hotel = Hotel.objects.mongo_aggregate([{'$match': {'name': 'The Oberoi Udaivilas'}},
-        #                                        {'$project': {'room': {'$filter': {'input': '$room',
-        #                                                                           'as': 'room',
-        #                                                                           'cond': {'$eq': ['$$room.places', 2]}}}}}])
-        # hotel = list(hotel)
-        # pprint(hotel)
+
+        hotel = Hotel.objects.mongo_aggregate([{'$match': {'name': 'The Oberoi Udaivilas'}},
+                                               {
+                                                   '$project': {
+                                                       'room': {
+                                                           '$filter': {'input': {'$map': {'input': '$room',
+                                                                                          'as': 'room',
+                                                                                          'in': {
+                                                                                              'number': '$$room.number',
+                                                                                              'places': '$$room.places',
+                                                                                              'price': '$$room.price',
+                                                                                              'reserved': {
+                                                                                                  '$filter': {
+                                                                                                      'input': '$$room.reserved',
+                                                                                                      'as': 'reserved',
+                                                                                                      'cond': {'$eq': ['$$reserved.person', 10]}
+                                                                                                  }
+                                                                                              }
+                                                                                          }}},
+                                                                       'as': 'room',
+                                                                       'cond': {'$ne': ['$$room.reserved', []]}}
+                                                       }
+                                                   }
+                                               }
+                                               ])
+        hotel = list(hotel)
+        pprint(hotel)
 
 
         # hotel = Hotel.objects.mongo_find_one({'name': 'The Oberoi Udaivilas'})['room'][0]['category']

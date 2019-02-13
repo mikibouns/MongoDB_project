@@ -11,7 +11,7 @@ def room_filter(hotel, places=None):
                                                              {'$filter':
                                                                   {'input': '$room',
                                                                    'as': 'room',
-                                                                   'cond': {'$eq': ['$$room.places', places]}
+                                                                   'cond': {'$and': ['$$room.places', places]}
                                                                    }
                                                               }
                                                          }
