@@ -1,10 +1,14 @@
 from django.shortcuts import render, HttpResponseRedirect
 from .models import Hotel
-from django.db.models import Q
+import time
+import datetime
 
 
-
-def room_filter(hotel, places=None):
+def room_filter(hotel, places=None, check_in=None, check_out=None):
+    if check_in:
+        check_in = time.mktime(datetime.datetime.strptime(check_in, "%Y-%m-%d").timetuple())
+    if check_out:
+        check_out = time.mktime(datetime.datetime.strptime(check_out, "%Y-%m-%d").timetuple())
     for hr in Hotel.objects.mongo_aggregate([{'$match': {'name': hotel['name']}},
                                                    {'$project':
                                                         {'room':
@@ -22,12 +26,16 @@ def room_filter(hotel, places=None):
                                                                                                   '$filter': {
                                                                                                       'input': '$$room.reserved',
                                                                                                       'as': 'reserved',
-                                                                                                      'cond': {}
+                                                                                                      'cond': {'$or': [{'$and': [{'$gte': ['check_in', '$$reserved.check_in']},
+                                                                                                                                 {'$lte': ['check_in', '$$reserved.check_out']}]},
+                                                                                                                        {'$and': [{'$gte': ['check_out', '$$reserved.check_in']},
+                                                                                                                                  {'$lte': ['check_out', '$$reserved.check_out']}]}]}
                                                                                                   }
                                                                                               }
                                                                                           }}},
                                                                    'as': 'room',
-                                                                   'cond': {'$eq': ['$$room.places', places]}
+                                                                   'cond':{'$and': [{'$eq': ['$$room.places', places]},
+                                                                                    {'$ne': ['$$room.reserved', []]}]}
                                                                    }
                                                               }
                                                          }
@@ -51,20 +59,18 @@ def hotel_page(request, short_name):
     check_out = (request.GET.get('check-out', None))
     places = (request.GET.get('places', None))
     hr_filter = hotel['room']
-    if places:
+    if places and check_in and check_out:
         hr_filter = room_filter(hotel=hotel,
-                                places=int(places),)
-    #     filter = hotel_rooms.filter(Q(hr_places=places) &
-    #                                 (Q(reserveddates__check_in__gt=check_in) &
-    #                                  Q(reserveddates__check_in__lt=check_out) |
-    #                                  Q(reserveddates__check_out__gt=check_in) &
-    #                                  Q(reserveddates__check_out__gt=check_out))).distinct()
+                                places=int(places),
+                                check_in=check_in,
+                                check_out=check_out,)
     #     if request.method == 'POST':
     #         add_srv = request.POST.get('additional_services', 'RO')
-    #
-    #
+
     template = "catalog_app/hotel_card.html"
     context = {'hotel': hotel,
                'room_filter': hr_filter,
-               'places': places}
+               'places': places,
+               'check_in': check_in,
+               'check_out': check_out}
     return render(request, template, context)

@@ -8,7 +8,7 @@ from pprint import pprint
 from random import randint, choice
 import datetime
 import time
-import pymongo
+
 
 # db_path = r'D:\Programms\MongoDB\data\db'
 #
@@ -22,20 +22,20 @@ import pymongo
 # except Exception as e:
 #     print(e)
 
-try:
-    os.remove(r'catalog_app\migrations\0001_initial.py')
-    print('catalog_app migrations deleted ')
-    os.remove(r'django\contrib\auth\migrations\0001_initial.py')
-    print('Auth migrations deleted ')
-except Exception as e:
-    print('Migrations is not found!')
-
-for command in ['makemigrations', 'migrate']:
-    try:
-        call('manage.py {}'.format(command), shell=True)
-        print('{} completed successfully'.format(command))
-    except Exception as e:
-        print(e)
+# try:
+#     os.remove(r'catalog_app\migrations\0001_initial.py')
+#     print('catalog_app migrations deleted ')
+#     os.remove(r'django\contrib\auth\migrations\0001_initial.py')
+#     print('Auth migrations deleted ')
+# except Exception as e:
+#     print('Migrations is not found!')
+#
+# for command in ['makemigrations', 'migrate']:
+#     try:
+#         call('manage.py {}'.format(command), shell=True)
+#         print('{} completed successfully'.format(command))
+#     except Exception as e:
+#         print(e)
 
 
 CATEGORY = [
@@ -139,36 +139,35 @@ def add_rooms():
 class Command(BaseCommand):
     def handle(self, *args, **options):
 
-        User.objects.all().delete()
-        for user in range(1, 11):
-            new_user = User.objects.create_user(
-                username='user{}'.format(user),
-                email='user{}@mail.com'.format(user),
-                password='123',
-            )
-            new_user.save()
+        # User.objects.all().delete()
+        # for user in range(1, 11):
+        #     new_user = User.objects.create_user(
+        #         username='user{}'.format(user),
+        #         email='user{}@mail.com'.format(user),
+        #         password='123',
+        #     )
+        #     new_user.save()
+        #
+        # # Создаем суперпользователя при помощи менеджера модели
+        # super_user = User.objects.create_superuser('admin', 'admin@mail.com', '123')
+        #
+        # for category in CATEGORY:
+        #     new_category = Category(**category)
+        #     new_category.save()
+        #
+        # Hotel.objects.mongo_insert_many(add_hotels())
+        #
+        # for hotel in Hotel.objects.mongo_find():
+        #     Hotel.objects.mongo_update_many(hotel, {'$set': {'room': add_rooms()}})
+        #
+        # for i in range(5):
+        #     for hotel in Hotel.objects.mongo_find():
+        #         target_field = 'room.{}.reserved'.format(i)
+        #         Hotel.objects.mongo_update_many(
+        #             hotel,
+        #             {'$addToSet': {target_field: {'$each': add_reserved()}}},
+        #         )
 
-        # Создаем суперпользователя при помощи менеджера модели
-        super_user = User.objects.create_superuser('admin', 'admin@mail.com', '123')
-
-        for category in CATEGORY:
-            new_category = Category(**category)
-            new_category.save()
-
-        Hotel.objects.mongo_insert_many(add_hotels())
-
-        for hotel in Hotel.objects.mongo_find():
-            Hotel.objects.mongo_update_many(hotel, {'$set': {'room': add_rooms()}})
-
-        for i in range(5):
-            for hotel in Hotel.objects.mongo_find():
-                target_field = 'room.{}.reserved'.format(i)
-                Hotel.objects.mongo_update_many(
-                    hotel,
-                    {'$addToSet': {target_field: {'$each': add_reserved()}}},
-                )
-
-        # Hotel.objects.mongo_create_index([{'number', pymongo.ASCENDING}])
 
 #-----------------------------------------------------------------------------------------------------------------------
 
@@ -188,41 +187,42 @@ class Command(BaseCommand):
 
         # pprint(Hotel.objects.mongo_find_one({'name': 'The Oberoi Udaivilas'})['room'][0]['reserved'])
 
-        def search_list():
-            data = [{'$eq': ['$$room.places', 5]}, {'$ne': ['$$room.reserved', []]}]
-            return data
+        # def search_list():
+        #     data = [{'$eq': ['$$room.places', 5]}, {'$ne': ['$$room.reserved', []]}]
+        #     return data
+        #
+        # hotel = Hotel.objects.mongo_aggregate([{'$match': {'name': 'The Oberoi Udaivilas'}},
+        #                                        {
+        #                                            '$project': {
+        #                                                'room': {
+        #                                                    '$filter': {'input': {'$map': {'input': '$room',
+        #                                                                                   'as': 'room',
+        #                                                                                   'in': {
+        #                                                                                       'number': '$$room.number',
+        #                                                                                       'places': '$$room.places',
+        #                                                                                       'price': '$$room.price',
+        #                                                                                       'description': '$$room.description',
+        #                                                                                       'img': '$$room.img',
+        #                                                                                       'reserved': {
+        #                                                                                           '$filter': {
+        #                                                                                               'input': '$$room.reserved',
+        #                                                                                               'as': 'reserved',
+        #                                                                                               'cond': {}
+        #                                                                                           }
+        #                                                                                       }
+        #                                                                                   }}},
+        #                                                                'as': 'room',
+        #                                                                'cond': {'$and': [{'$eq': ['$$room.places', 5]},
+        #                                                                                  {'$ne': ['$$room.reserved', []]}]}}
+        #                                                }
+        #                                            }
+        #                                        }
+        #                                        ])
+        # hotel = list(hotel)
+        # pprint(hotel)
 
-        hotel = Hotel.objects.mongo_aggregate([{'$match': {'name': 'The Oberoi Udaivilas'}},
-                                               {
-                                                   '$project': {
-                                                       'room': {
-                                                           '$filter': {'input': {'$map': {'input': '$room',
-                                                                                          'as': 'room',
-                                                                                          'in': {
-                                                                                              'number': '$$room.number',
-                                                                                              'places': '$$room.places',
-                                                                                              'price': '$$room.price',
-                                                                                              'description': '$$room.description',
-                                                                                              'img': '$$room.img',
-                                                                                              'reserved': {
-                                                                                                  '$filter': {
-                                                                                                      'input': '$$room.reserved',
-                                                                                                      'as': 'reserved',
-                                                                                                      'cond': {}
-                                                                                                  }
-                                                                                              }
-                                                                                          }}},
-                                                                       'as': 'room',
-                                                                       'cond': {'$and': [{'$eq': ['$$room.places', 5]},
-                                                                                         {'$ne': ['$$room.reserved', []]}]}}
-                                                       }
-                                                   }
-                                               }
-                                               ])
-        hotel = list(hotel)
-        pprint(hotel)
-
-
+        test_range = [i for i in range(1546984800.0, 1547589600.0)]
+        pprint(test_range)
 
 
 
