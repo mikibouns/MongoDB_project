@@ -160,15 +160,14 @@ class Command(BaseCommand):
         #
         # for hotel in Hotel.objects.mongo_find():
         #     Hotel.objects.mongo_update_many(hotel, {'$set': {'room': add_rooms()}})
-        #
-        # for i in range(5):
-        #     for hotel in Hotel.objects.mongo_find():
-        #         target_field = 'room.{}.reserved'.format(i)
-        #         pprint(target_field)
-        #         Hotel.objects.mongo_update(
-        #             hotel,
-        #             {'$addToSet': {target_field: {'$each': add_reserved()}}},
-        #         )
+
+        for i in range(5):
+            for hotel in Hotel.objects.mongo_find():
+                target_field = 'room.{}.reserved'.format(i)
+                Hotel.objects.mongo_update(
+                    hotel,
+                    {'$addToSet': {target_field: {'$each': add_reserved()}}},
+                )
 
 #-----------------------------------------------------------------------------------------------------------------------
 
