@@ -189,7 +189,9 @@ class Command(BaseCommand):
 
         # pprint(Hotel.objects.mongo_find_one({'name': 'The Oberoi Udaivilas'})['room'][0]['reserved'])
 
-
+        def search_list():
+            data = [{'$eq': ['$$room.places', 5]}, {'$ne': ['$$room.reserved', []]}]
+            return data
 
         hotel = Hotel.objects.mongo_aggregate([{'$match': {'name': 'The Oberoi Udaivilas'}},
                                                {
@@ -201,16 +203,19 @@ class Command(BaseCommand):
                                                                                               'number': '$$room.number',
                                                                                               'places': '$$room.places',
                                                                                               'price': '$$room.price',
+                                                                                              'description': '$$room.description',
+                                                                                              'img': '$$room.img',
                                                                                               'reserved': {
                                                                                                   '$filter': {
                                                                                                       'input': '$$room.reserved',
                                                                                                       'as': 'reserved',
-                                                                                                      'cond': {'$eq': ['$$reserved.person', 10]}
+                                                                                                      'cond': {}
                                                                                                   }
                                                                                               }
                                                                                           }}},
                                                                        'as': 'room',
-                                                                       'cond': {'$ne': ['$$room.reserved', []]}}
+                                                                       'cond': {'$and': [{'$eq': ['$$room.places', 5]},
+                                                                                         {'$ne': ['$$room.reserved', []]}]}}
                                                        }
                                                    }
                                                }
@@ -219,8 +224,6 @@ class Command(BaseCommand):
         pprint(hotel)
 
 
-        # hotel = Hotel.objects.mongo_find_one({'name': 'The Oberoi Udaivilas'})['room'][0]['category']
-        # pprint(hotel.id)
 
 
 

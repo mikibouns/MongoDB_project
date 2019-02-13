@@ -9,9 +9,24 @@ def room_filter(hotel, places=None):
                                                    {'$project':
                                                         {'room':
                                                              {'$filter':
-                                                                  {'input': '$room',
+                                                                  {'input': {'$map': {'input': '$room',
+                                                                                          'as': 'room',
+                                                                                          'in': {
+                                                                                              'number': '$$room.number',
+                                                                                              'places': '$$room.places',
+                                                                                              'price': '$$room.price',
+                                                                                              'description': '$$room.description',
+                                                                                              'img': '$$room.img',
+                                                                                              'reserved': {
+                                                                                                  '$filter': {
+                                                                                                      'input': '$$room.reserved',
+                                                                                                      'as': 'reserved',
+                                                                                                      'cond': {}
+                                                                                                  }
+                                                                                              }
+                                                                                          }}},
                                                                    'as': 'room',
-                                                                   'cond': {'$and': ['$$room.places', places]}
+                                                                   'cond': {'$eq': ['$$room.places', places]}
                                                                    }
                                                               }
                                                          }
