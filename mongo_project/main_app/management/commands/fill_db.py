@@ -55,7 +55,7 @@ category_list = [i['name'] for i in CATEGORY]
 
 
 def add_reserved():
-    reversed_list = []
+    reserved_list = []
     users = ['user{}'.format(i) for i in range(1, 11)]
     for _ in range(8):
         person = User.objects.get(username=choice(users))
@@ -66,8 +66,8 @@ def add_reserved():
             'check_in': time.mktime(start_date.timetuple()),
             'check_out': time.mktime(last_date.timetuple())
         }
-        reversed_list.append(reserved_data)
-    return reversed_list
+        reserved_list.append(reserved_data)
+    return reserved_list
 
 
 def add_hotels():
@@ -140,32 +140,35 @@ def add_rooms():
 class Command(BaseCommand):
     def handle(self, *args, **options):
 
-        User.objects.all().delete()
-        for user in range(1, 11):
-            new_user = User.objects.create_user(
-                username='user{}'.format(user),
-                email='user{}@mail.com'.format(user),
-                password='123',
-            )
-            new_user.save()
-
-        # Создаем суперпользователя при помощи менеджера модели
-        super_user = User.objects.create_superuser('admin', 'admin@mail.com', '123')
-
-        for category in CATEGORY:
-            new_category = Category(**category)
-            new_category.save()
-
-        Hotel.objects.mongo_insert_many(add_hotels())
-
-        for hotel in Hotel.objects.mongo_find():
-            Hotel.objects.mongo_update_many(hotel, {'$set': {'room': add_rooms()}})
-
-        for hotel in Hotel.objects.mongo_find():
-            Hotel.objects.mongo_update(
-                hotel,
-                {'$push': {'room.$[].reserved': {'$each': add_reserved()}}},
-            )
+        # User.objects.all().delete()
+        # for user in range(1, 11):
+        #     new_user = User.objects.create_user(
+        #         username='user{}'.format(user),
+        #         email='user{}@mail.com'.format(user),
+        #         password='123',
+        #     )
+        #     new_user.save()
+        #
+        # # Создаем суперпользователя при помощи менеджера модели
+        # super_user = User.objects.create_superuser('admin', 'admin@mail.com', '123')
+        #
+        # for category in CATEGORY:
+        #     new_category = Category(**category)
+        #     new_category.save()
+        #
+        # Hotel.objects.mongo_insert_many(add_hotels())
+        #
+        # for hotel in Hotel.objects.mongo_find():
+        #     Hotel.objects.mongo_update_many(hotel, {'$set': {'room': add_rooms()}})
+        #
+        # for i in range(5):
+        #     for hotel in Hotel.objects.mongo_find():
+        #         target_field = 'room.{}.reserved'.format(i)
+        #         pprint(target_field)
+        #         Hotel.objects.mongo_update(
+        #             hotel,
+        #             {'$addToSet': {target_field: {'$each': add_reserved()}}},
+        #         )
 
 #-----------------------------------------------------------------------------------------------------------------------
 
@@ -186,84 +189,55 @@ class Command(BaseCommand):
         # pprint(Hotel.objects.mongo_find_one({'name': 'The Oberoi Udaivilas'})['room'][0]['reserved'])
 
 
-        # def request_condition():
-        #     answer = {'$eq': ['$$room.places', 5]}
-        #     return answer
         #
-        # hotel1 = Hotel.objects.mongo_find_one({'name': 'The Oberoi Udaivilas'})
-        # # # pprint(type(hotel1['room']))
-        # for hotel in Hotel.objects.mongo_aggregate([{'$match': {'name': hotel1['name']}},
-        #                                        {'$project':
-        #                                             {'room':
-        #                                                  {'$filter':
-        #                                                       {'input': {'map': {'input': '$room',
-        #                                                                          'as': 'room',
-        #                                                                          'in': {'reversed': {'$filter': {'input': '$$room.reserved',
-        #                                                                                                          'as': 'rev',
-        #                                                                                                          'cound': {'$or' []}}}}}},
-        #                                                        'as': 'room',
-        #                                                        'cond': request_condition()
-        #                                                        }
-        #                                                   }
-        #                                              }
-        #                                         }
-        #                                        ]):
-        #     pprint(hotel['room'])
+        # hotel = Hotel.objects.mongo_aggregate([{'$match': {'name': 'The Oberoi Udaivilas'}},
+        #                                        {'$project': {'room': {'$filter': {'input': '$room',
+        #                                                                           'as': 'room',
+        #                                                                           'cond': {'$eq': ['$$room.places', 2]}}}}}])
+        # hotel = list(hotel)
+        # pprint(hotel)
 
 
         # hotel = Hotel.objects.mongo_find_one({'name': 'The Oberoi Udaivilas'})['room'][0]['category']
-        # pprint(hotel.as_doc()['$ref'])
+        # pprint(hotel.id)
 
 
 
-
-db.mycollection.aggregate([
-  { "$match": {
-    "someArray": {
-      "$elemMatch": {
-         "name": "name1",
-         "someNestedArray": {
-           "$elemMatch": {
-             "name": "value",
-             "otherField": 1
-           }
-         }
-       }
-    }
-  }},
-  { "$addFields": {
-    "someArray": {
-      "$filter": {
-        "input": {
-          "$map": {
-            "input": "$someArray",
-            "as": "sa",
-            "in": {
-              "name": "$$sa.name",
-              "someNestedArray": {
-                "$filter": {
-                  "input": "$$sa.someNestedArray",
-                  "as": "sn",
-                  "cond": {
-                    "$and": [
-                      { "$eq": [ "$$sn.name", "value" ] },
-                      { "$eq": [ "$$sn.otherField", 1 ] }
-                    ]
-                  }
-                }
-              }
-            }
-          },
-        },
-        "as": "sa",
-        "cond": {
-          "$and": [
-            { "$eq": [ "$$sa.name", "name1" ] },
-            { "$gt": [ { "$size": "$$sa.someNestedArray" }, 0 ] }
-          ]
-        }
-      }
-    }
-  }}
-])
+#
+# db.mycollection.aggregate([
+#   { "$addFields": {
+#     "someArray": {
+#       "$filter": {
+#         "input": {
+#           "$map": {
+#             "input": "$someArray",
+#             "as": "sa",
+#             "in": {
+#               "name": "$$sa.name",
+#               "someNestedArray": {
+#                 "$filter": {
+#                   "input": "$$sa.someNestedArray",
+#                   "as": "sn",
+#                   "cond": {
+#                     "$and": [
+#                       { "$eq": [ "$$sn.name", "value" ] },
+#                       { "$eq": [ "$$sn.otherField", 1 ] }
+#                     ]
+#                   }
+#                 }
+#               }
+#             }
+#           },
+#         },
+#         "as": "sa",
+#         "cond": {
+#           "$and": [
+#             { "$eq": [ "$$sa.name", "name1" ] },
+#             { "$gt": [ { "$size": "$$sa.someNestedArray" }, 0 ] }
+#           ]
+#         }
+#       }
+#     }
+#   }}
+# ])
 
