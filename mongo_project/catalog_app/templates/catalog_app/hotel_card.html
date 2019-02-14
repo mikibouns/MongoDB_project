@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load dbref_data %}
+{% load timestamp_to_date %}
 {% block title %}hotel_card{% endblock %}
 {% block container %}
 {% if hotel %}
@@ -64,6 +65,7 @@
         <th>Категория</th>
         <th>Цена</th>
         <th>Количество мест</th>
+        <th>Забронированные даты</th>
         <th>Дополнительные сервисы</th>
         <th></th>
       </tr>
@@ -75,6 +77,11 @@
         <td>{{ room.category|dbref_data:"name" }}</td>
         <td>{{ room.price }} <span class="glyphicon glyphicon-euro"></span></td>
         <td>{{ room.places}}</td>
+        <td>
+          {% for reserved in room.reserved %}
+          {{ reserved.check_in|timestamp_to_date:"%d-%m-%Y"}} - {{ reserved.check_out|timestamp_to_date:"%d-%m-%Y" }}<br/>
+          {% endfor %}
+        </td>
         <td>
           <select name="additional_services">
             <option>RO</option>

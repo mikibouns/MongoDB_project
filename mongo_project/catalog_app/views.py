@@ -1,14 +1,21 @@
-from django.shortcuts import render, HttpResponseRedirect
+from django.shortcuts import render
 from .models import Hotel
 import time
 import datetime
+from pprint import pprint
 
 
 def room_filter(hotel, places=None, check_in=None, check_out=None):
     if check_in:
         check_in = time.mktime(datetime.datetime.strptime(check_in, "%Y-%m-%d").timetuple())
+        check_in = {'$or': [{'$gt': [check_in, '$$reserved.check_out']},
+                             {'$lt': [check_in, '$$reserved.check_in']}]}
     if check_out:
         check_out = time.mktime(datetime.datetime.strptime(check_out, "%Y-%m-%d").timetuple())
+        check_out = {'$or': [{'$gt': [check_out, '$$reserved.check_out']},
+                              {'$lt': [check_out, '$$reserved.check_in']}]}
+    if places:
+        places = {'$eq': ['$$room.places', int(places)]}
     for hr in Hotel.objects.mongo_aggregate([{'$match': {'name': hotel['name']}},
                                                    {'$project':
                                                         {'room':
@@ -26,21 +33,20 @@ def room_filter(hotel, places=None, check_in=None, check_out=None):
                                                                                                   '$filter': {
                                                                                                       'input': '$$room.reserved',
                                                                                                       'as': 'reserved',
-                                                                                                      'cond': {'$or': [{'$and': [{'$gte': ['check_in', '$$reserved.check_in']},
-                                                                                                                                 {'$lte': ['check_in', '$$reserved.check_out']}]},
-                                                                                                                        {'$and': [{'$gte': ['check_out', '$$reserved.check_in']},
-                                                                                                                                  {'$lte': ['check_out', '$$reserved.check_out']}]}]}
+                                                                                                      'cond': {'$and': [check_in,
+                                                                                                                       check_out]}
                                                                                                   }
                                                                                               }
                                                                                           }}},
                                                                    'as': 'room',
-                                                                   'cond':{'$and': [{'$eq': ['$$room.places', places]},
+                                                                   'cond':{'$and': [places,
                                                                                     {'$ne': ['$$room.reserved', []]}]}
                                                                    }
                                                               }
                                                          }
                                                     }
                                                    ]):
+        pprint(hr['room'])
         return hr['room']
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -59,9 +65,9 @@ def hotel_page(request, short_name):
     check_out = (request.GET.get('check-out', None))
     places = (request.GET.get('places', None))
     hr_filter = hotel['room']
-    if places and check_in and check_out:
+    if places or check_in or check_out:
         hr_filter = room_filter(hotel=hotel,
-                                places=int(places),
+                                places=places,
                                 check_in=check_in,
                                 check_out=check_out,)
     #     if request.method == 'POST':
