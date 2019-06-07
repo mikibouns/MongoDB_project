@@ -2,7 +2,6 @@ from django.shortcuts import render
 from .models import Hotel
 import time
 import datetime
-from pprint import pprint
 
 
 def room_filter(hotel, places=None, check_in=None, check_out=None):
@@ -46,7 +45,6 @@ def room_filter(hotel, places=None, check_in=None, check_out=None):
                                                          }
                                                     }
                                                    ]):
-        pprint(hr['room'])
         return hr['room']
 
 #-----------------------------------------------------------------------------------------------------------------------
