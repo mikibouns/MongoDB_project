@@ -9,6 +9,9 @@ from random import randint, choice
 import datetime
 import time
 
+from django.core.mail import send_mail
+from django.conf import settings
+
 
 # db_path = r'D:\Programms\MongoDB\data\db'
 #
@@ -187,6 +190,12 @@ class Command(BaseCommand):
 
         # pprint(Hotel.objects.mongo_find_one({'name': 'The Oberoi Udaivilas'})['room'][0]['reserved'])
 
+        subject = 'Thank you for registering to our site'
+        message = ' it  means a world to us '
+        email_from = settings.EMAIL_HOST_USER
+        recipient_list = ['mikibouns@gmail.com', ]
+        send_mail(subject, message, email_from, recipient_list)
+
         def search_list():
             data = [{'$eq': ['$$room.places', 5]}, {'$ne': ['$$room.reserved', []]}]
             return data
@@ -219,4 +228,4 @@ class Command(BaseCommand):
                                                }
                                                ])
         hotel = list(hotel)
-        pprint(hotel)
+        # pprint(hotel)
